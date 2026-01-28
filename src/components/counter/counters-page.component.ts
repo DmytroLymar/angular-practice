@@ -28,6 +28,10 @@ export class CountersPageComponent {
     this.countersService.resetAll();
   }
 
+  clearStorage(): void {
+    this.countersService.clearStorage();
+  }
+
   increment(id: number) {
     this.countersService.increment(id);
   }

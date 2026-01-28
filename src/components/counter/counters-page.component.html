@@ -3,6 +3,7 @@
     <p>Total counters: {{ vm.countersCount }} | Total count: {{ vm.totalCount }}</p>
     <button (click)="addCounter()">Add counter</button>
     <button (click)="resetAll()" [disabled]="!vm.hasCounters">Reset all</button>
+    <button (click)="clearStorage()">Clear storage</button>
     @if (vm.counters.length === 0) {
       <p>No counters yet</p>
     } @else {
