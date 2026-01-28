@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { CountersService } from './counters.service';
 import { CounterComponent } from './counter.component';
-import { combineLatest, startWith } from 'rxjs';
+import { combineLatest, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-counters-page',
@@ -15,10 +15,17 @@ export class CountersPageComponent {
 
   readonly vm$ = combineLatest({
     counters: this.countersService.counters$,
-    countersCount: this.countersService.countersCount$,
-    totalCount: this.countersService.totalCount$,
-    hasCounters: this.countersService.hasCounters$,
-  }).pipe(startWith({ counters: [], countersCount: 0, totalCount: 0, hasCounters: false }));
+    loading: this.countersService.loading$,
+    error: this.countersService.error$,
+  }).pipe(
+    map(({ counters, loading, error }) => ({
+      counters,
+      loading,
+      error,
+      hasCounters: counters.length > 0,
+    })),
+    startWith({ counters: [], loading: false, error: null as string | null, hasCounters: false }),
+  );
 
   addCounter(): void {
     this.countersService.addCounter();
@@ -46,5 +53,16 @@ export class CountersPageComponent {
 
   remove(id: number): void {
     this.countersService.removeCounter(id);
+  }
+
+  ngOnInit() {
+    this.countersService.load();
+  }
+
+  reload() {
+    this.countersService.load();
+  }
+  reloadFail() {
+    this.countersService.load({ fail: true });
   }
 }

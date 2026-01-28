@@ -1,19 +1,24 @@
 <div>
   @if (vm$ | async; as vm) {
-    <p>Total counters: {{ vm.countersCount }} | Total count: {{ vm.totalCount }}</p>
-    <button (click)="addCounter()">Add counter</button>
-    <button (click)="resetAll()" [disabled]="!vm.hasCounters">Reset all</button>
-    <button (click)="clearStorage()">Clear storage</button>
-    @if (vm.counters.length === 0) {
-      <p>No counters yet</p>
+    <button (click)="reload()">Reload</button>
+    <button (click)="reloadFail()">Reload (fail)</button>
+    <button (click)="addCounter()">Add</button>
+    <button (click)="resetAll()">Reset all</button>
+
+    @if (vm.loading) {
+      <p>Loading...</p>
+    } @else if (vm.error) {
+      <p style="color: red">Error: {{ vm.error }}</p>
+    } @else if (!vm.hasCounters) {
+      <p>No counters</p>
     } @else {
-      @for (counter of vm.counters; track counter.id) {
+      @for (c of vm.counters; track c.id) {
         <app-counter
-          [counter]="counter"
-          (increment)="increment(counter.id)"
-          (decrement)="decrement(counter.id)"
-          (reset)="reset(counter.id)"
-          (remove)="remove(counter.id)"
+          [counter]="c"
+          (increment)="increment(c.id)"
+          (decrement)="decrement(c.id)"
+          (remove)="remove(c.id)"
+          (reset)="reset(c.id)"
         ></app-counter>
       }
     }

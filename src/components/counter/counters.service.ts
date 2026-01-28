@@ -1,6 +1,16 @@
 import { isPlatformBrowser } from '@angular/common';
-import { DestroyRef, Inject, inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { BehaviorSubject, distinctUntilChanged, map, skip, tap } from 'rxjs';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import {
+  BehaviorSubject,
+  catchError,
+  distinctUntilChanged,
+  finalize,
+  map,
+  of,
+  skip,
+  tap,
+} from 'rxjs';
+import { CountersApiService } from './counters-api.service';
 
 export type CounterItem = {
   id: number;
@@ -9,52 +19,33 @@ export type CounterItem = {
 
 @Injectable({ providedIn: 'root' })
 export class CountersService {
-  private nextId = 1;
   private readonly STORAGE_KEY = 'counters_v1';
-  private readonly destroyRef = inject(DestroyRef);
 
   private readonly _counters$ = new BehaviorSubject<CounterItem[]>([]);
   readonly counters$ = this._counters$.asObservable();
 
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {
-    if (isPlatformBrowser(this.platformId)) {
-      const loaded = this.loadFromStorage();
-      this._counters$.next(loaded);
-      this.nextId = this.computeNextId(loaded);
+  private readonly _loading$ = new BehaviorSubject<boolean>(false);
+  readonly loading$ = this._loading$.asObservable();
 
-      this.counters$
-        .pipe(
-          skip(1),
-          tap((counters) => localStorage.setItem(this.STORAGE_KEY, JSON.stringify(counters))),
-        )
-        .subscribe();
-    }
-  }
+  private readonly _error$ = new BehaviorSubject<string | null>(null);
+  readonly error$ = this._error$.asObservable();
 
-  private loadFromStorage(): CounterItem[] {
-    if (!isPlatformBrowser(this.platformId)) {
-      return [];
-    }
+  constructor(private api: CountersApiService) {}
 
-    const countersString = localStorage.getItem(this.STORAGE_KEY);
-    if (!countersString) return [];
+  load(opts?: { fail?: boolean }): void {
+    this._loading$.next(true);
+    this._error$.next(null);
 
-    try {
-      const data = JSON.parse(countersString);
-      if (!Array.isArray(data)) return [];
-
-      return data.map((x) => ({
-        id: Number(x.id),
-        count: Math.max(0, Number(x.count)),
-      }));
-    } catch {
-      return [];
-    }
-  }
-
-  private computeNextId(items: CounterItem[]): number {
-    const maxId = items.reduce((m, c) => Math.max(m, c.id), 0);
-    return maxId + 1;
+    this.api
+      .getCounters(opts)
+      .pipe(
+        catchError((err) => {
+          this._error$.next(err?.error?.message ?? 'Unknown error');
+          return of([] as CounterItem[]);
+        }),
+        finalize(() => this._loading$.next(false)),
+      )
+      .subscribe((items) => this._counters$.next(items));
   }
 
   readonly countersCount$ = this.counters$.pipe(
@@ -73,35 +64,78 @@ export class CountersService {
   );
 
   addCounter(): void {
-    this._counters$.next([...this._counters$.value, { id: this.nextId++, count: 0 }]);
+    this._loading$.next(true);
+    this._error$.next(null);
+
+    this.api
+      .addCounter()
+      .pipe(
+        catchError((err) => {
+          this._error$.next(err?.error?.message ?? 'Unknown error');
+          return of(null);
+        }),
+        finalize(() => this._loading$.next(false)),
+      )
+      .subscribe((created) => {
+        if (!created) return;
+        this._counters$.next([...this._counters$.value, created]);
+      });
   }
 
   increment(id: number): void {
-    this._counters$.next(
-      this._counters$.value.map((counter) =>
-        counter.id === id ? { ...counter, count: counter.count + 1 } : counter,
-      ),
-    );
+    const current = this._counters$.value.find((c) => c.id === id);
+    if (!current) return;
+
+    this.updateCount(id, current.count + 1);
   }
 
   decrement(id: number): void {
-    this._counters$.next(
-      this._counters$.value.map((counter) =>
-        counter.id === id ? { ...counter, count: Math.max(0, counter.count - 1) } : counter,
-      ),
-    );
+    const current = this._counters$.value.find((c) => c.id === id);
+    if (!current) return;
+
+    this.updateCount(id, Math.max(0, current.count - 1));
   }
 
   reset(id: number): void {
-    this._counters$.next(
-      this._counters$.value.map((counter) =>
-        counter.id === id ? { ...counter, count: 0 } : counter,
-      ),
-    );
+    this.updateCount(id, 0);
+  }
+
+  private updateCount(id: number, count: number): void {
+    this._loading$.next(true);
+    this._error$.next(null);
+
+    this.api
+      .updateCount(id, count)
+      .pipe(
+        catchError((err) => {
+          this._error$.next(err?.error?.message ?? 'Unknown error');
+          return of(null);
+        }),
+        finalize(() => this._loading$.next(false)),
+      )
+      .subscribe((updated) => {
+        if (!updated) return;
+        this._counters$.next(this._counters$.value.map((c) => (c.id === id ? updated : c)));
+      });
   }
 
   removeCounter(id: number): void {
-    this._counters$.next(this._counters$.value.filter((c) => c.id !== id));
+    this._loading$.next(true);
+    this._error$.next(null);
+
+    this.api
+      .removeCounter(id)
+      .pipe(
+        catchError((err) => {
+          this._error$.next(err?.error?.message ?? 'Unknown error');
+          return of(null);
+        }),
+        finalize(() => this._loading$.next(false)),
+      )
+      .subscribe((res) => {
+        if (!res) return;
+        this._counters$.next(this._counters$.value.filter((c) => c.id !== id));
+      });
   }
 
   resetAll(): void {
@@ -111,6 +145,5 @@ export class CountersService {
   clearStorage(): void {
     localStorage.removeItem(this.STORAGE_KEY);
     this._counters$.next([]);
-    this.nextId = 1;
   }
 }
