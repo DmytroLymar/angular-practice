@@ -1,9 +1,19 @@
 <div>
-  <app-counter-display [count]="count"></app-counter-display>
-  <app-counter-controls
-    [count]="count"
-    (increment)="increase()"
-    (decrement)="decrease()"
-    (reset)="reset()"
-  ></app-counter-controls>
+  @if (count$ | async; as count) {
+    <app-counter-display [count]="count"></app-counter-display>
+    <app-counter-controls
+      [count]="count"
+      (increment)="increase()"
+      (decrement)="decrease()"
+      (reset)="reset()"
+    ></app-counter-controls>
+  } @else {
+    <app-counter-display [count]="0"></app-counter-display>
+    <app-counter-controls
+      [count]="0"
+      (increment)="increase()"
+      (decrement)="decrease()"
+      (reset)="reset()"
+    ></app-counter-controls>
+  }
 </div>
