@@ -1,15 +1,12 @@
 <div>
-  @if (counters$ | async; as counters) {
-    <p>
-      Total counters: {{ (countersCount$ | async) ?? 0 }} | Total count:
-      {{ (totalCount$ | async) ?? 0 }}
-    </p>
+  @if (vm$ | async; as vm) {
+    <p>Total counters: {{ vm.countersCount }} | Total count: {{ vm.totalCount }}</p>
     <button (click)="addCounter()">Add counter</button>
-    <button (click)="resetAll()" [disabled]="!((hasCounters$ | async) ?? false)">Reset all</button>
-    @if (counters.length === 0) {
+    <button (click)="resetAll()" [disabled]="!vm.hasCounters">Reset all</button>
+    @if (vm.counters.length === 0) {
       <p>No counters yet</p>
     } @else {
-      @for (counter of counters; track counter.id) {
+      @for (counter of vm.counters; track counter.id) {
         <app-counter
           [counter]="counter"
           (increment)="increment(counter.id)"

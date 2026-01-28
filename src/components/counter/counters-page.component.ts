@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { CountersService } from './counters.service';
 import { CounterComponent } from './counter.component';
+import { combineLatest, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-counters-page',
@@ -12,10 +13,12 @@ import { CounterComponent } from './counter.component';
 export class CountersPageComponent {
   private readonly countersService = inject(CountersService);
 
-  readonly counters$ = this.countersService.counters$;
-  readonly countersCount$ = this.countersService.countersCount$;
-  readonly totalCount$ = this.countersService.totalCount$;
-  readonly hasCounters$ = this.countersService.hasCounters$;
+  readonly vm$ = combineLatest({
+    counters: this.countersService.counters$,
+    countersCount: this.countersService.countersCount$,
+    totalCount: this.countersService.totalCount$,
+    hasCounters: this.countersService.hasCounters$,
+  }).pipe(startWith({ counters: [], countersCount: 0, totalCount: 0, hasCounters: false }));
 
   addCounter(): void {
     this.countersService.addCounter();
