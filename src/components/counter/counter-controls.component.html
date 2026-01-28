@@ -1,0 +1,5 @@
+<div class="controls">
+  <button (click)="onIncrement()">+</button>
+  <button [disabled]="count === 0" (click)="onDecrement()">-</button>
+  <button (click)="onReset()">reset</button>
+</div>

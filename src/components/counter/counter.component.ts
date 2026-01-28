@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
+import { CounterControlsComponent } from './counter-controls.component';
+import { CounterDisplayComponent } from './counter-display.component';
 
 @Component({
   selector: 'app-counter',
   standalone: true,
   templateUrl: './counter.component.html',
-  imports: [],
+  imports: [CounterControlsComponent, CounterDisplayComponent],
 })
 export class CounterComponent {
-  count: number = 0;
+  count = 0;
 
   increase(): void {
     this.count++;
