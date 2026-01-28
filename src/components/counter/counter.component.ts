@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CounterControlsComponent } from './counter-controls.component';
 import { CounterDisplayComponent } from './counter-display.component';
+import { CounterService } from './counter.service';
 
 @Component({
   selector: 'app-counter',
@@ -9,19 +10,21 @@ import { CounterDisplayComponent } from './counter-display.component';
   imports: [CounterControlsComponent, CounterDisplayComponent],
 })
 export class CounterComponent {
-  count = 0;
+  private readonly counterService = inject(CounterService);
+
+  get count(): number {
+    return this.counterService.count;
+  }
 
   increase(): void {
-    this.count++;
+    this.counterService.increase();
   }
 
   decrease(): void {
-    if (this.count > 0) {
-      this.count--;
-    }
+    this.counterService.decrease();
   }
 
   reset(): void {
-    this.count = 0;
+    this.counterService.reset();
   }
 }
