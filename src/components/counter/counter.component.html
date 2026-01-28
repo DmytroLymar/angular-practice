@@ -1,0 +1,10 @@
+<div>
+  <app-counter-display [count]="counter.count"></app-counter-display>
+  <app-counter-controls
+    [count]="counter.count"
+    (increment)="onIncrement()"
+    (decrement)="onDecrement()"
+    (reset)="onReset()"
+    (remove)="onRemove()"
+  ></app-counter-controls>
+</div>

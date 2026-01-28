@@ -1,0 +1,26 @@
+<div>
+  @if (vm$ | async; as vm) {
+    <button (click)="reload()">Reload</button>
+    <button (click)="reloadFail()">Reload (fail)</button>
+    <button (click)="addCounter()">Add</button>
+    <button (click)="resetAll()">Reset all</button>
+
+    @if (vm.loading) {
+      <p>Loading...</p>
+    } @else if (vm.error) {
+      <p style="color: red">Error: {{ vm.error }}</p>
+    } @else if (!vm.hasCounters) {
+      <p>No counters</p>
+    } @else {
+      @for (c of vm.counters; track c.id) {
+        <app-counter
+          [counter]="c"
+          (increment)="increment(c.id)"
+          (decrement)="decrement(c.id)"
+          (remove)="remove(c.id)"
+          (reset)="reset(c.id)"
+        ></app-counter>
+      }
+    }
+  }
+</div>

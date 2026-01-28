@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { CountersPageComponent } from '../components/counter/counters-page.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  imports: [CountersPageComponent, CountersPageComponent],
+  template: `
+    <div>
+      <h1>App</h1>
+      <app-counters-page />
+    </div>
+  `,
 })
-export class App {
-  protected readonly title = signal('angular-practice');
-}
+export class App {}
