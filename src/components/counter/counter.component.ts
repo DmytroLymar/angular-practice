@@ -1,29 +1,35 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, output } from '@angular/core';
 import { CounterControlsComponent } from './counter-controls.component';
 import { CounterDisplayComponent } from './counter-display.component';
-import { CounterService } from './counter.service';
-import { AsyncPipe } from '@angular/common';
+import { CounterItem } from './counters.service';
 
 @Component({
   selector: 'app-counter',
   standalone: true,
   templateUrl: './counter.component.html',
-  imports: [CounterControlsComponent, CounterDisplayComponent, AsyncPipe],
+  imports: [CounterControlsComponent, CounterDisplayComponent],
 })
 export class CounterComponent {
-  private readonly counterService = inject(CounterService);
+  @Input({ required: true }) counter!: CounterItem;
 
-  readonly count$ = this.counterService.count$;
+  increment = output<void>();
+  decrement = output<void>();
+  reset = output<void>();
+  remove = output<void>();
 
-  increase(): void {
-    this.counterService.increase();
+  onIncrement(): void {
+    this.increment.emit();
   }
 
-  decrease(): void {
-    this.counterService.decrease();
+  onDecrement(): void {
+    this.decrement.emit();
   }
 
-  reset(): void {
-    this.counterService.reset();
+  onReset(): void {
+    this.reset.emit();
+  }
+
+  onRemove(): void {
+    this.remove.emit();
   }
 }

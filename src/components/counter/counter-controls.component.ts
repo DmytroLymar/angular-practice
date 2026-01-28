@@ -12,6 +12,7 @@ export class CounterControlsComponent {
   increment = output<void>();
   decrement = output<void>();
   reset = output<void>();
+  remove = output<void>();
 
   onIncrement(): void {
     this.increment.emit();
@@ -23,5 +24,9 @@ export class CounterControlsComponent {
 
   onReset(): void {
     this.reset.emit();
+  }
+
+  onRemove(): void {
+    this.remove.emit();
   }
 }

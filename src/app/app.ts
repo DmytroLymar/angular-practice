@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import { CounterComponent } from '../components/counter/counter.component';
+import { CountersPageComponent } from '../components/counter/counters-page.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CounterComponent],
+  imports: [CountersPageComponent, CountersPageComponent],
   template: `
     <div>
       <h1>App</h1>
-      <app-counter />
+      <app-counters-page />
     </div>
   `,
 })
