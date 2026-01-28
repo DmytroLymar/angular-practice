@@ -1,7 +1,11 @@
 <div>
   @if (counters$ | async; as counters) {
+    <p>
+      Total counters: {{ (countersCount$ | async) ?? 0 }} | Total count:
+      {{ (totalCount$ | async) ?? 0 }}
+    </p>
     <button (click)="addCounter()">Add counter</button>
-    <button (click)="resetAll()" [disabled]="counters.length === 0">Reset all</button>
+    <button (click)="resetAll()" [disabled]="!((hasCounters$ | async) ?? false)">Reset all</button>
     @if (counters.length === 0) {
       <p>No counters yet</p>
     } @else {

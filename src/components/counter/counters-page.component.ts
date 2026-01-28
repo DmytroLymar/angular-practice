@@ -13,6 +13,9 @@ export class CountersPageComponent {
   private readonly countersService = inject(CountersService);
 
   readonly counters$ = this.countersService.counters$;
+  readonly countersCount$ = this.countersService.countersCount$;
+  readonly totalCount$ = this.countersService.totalCount$;
+  readonly hasCounters$ = this.countersService.hasCounters$;
 
   addCounter(): void {
     this.countersService.addCounter();

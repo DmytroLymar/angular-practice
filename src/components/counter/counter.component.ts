@@ -1,4 +1,4 @@
-import { Component, inject, Input, output } from '@angular/core';
+import { Component, Input, output } from '@angular/core';
 import { CounterControlsComponent } from './counter-controls.component';
 import { CounterDisplayComponent } from './counter-display.component';
 import { CounterItem } from './counters.service';
